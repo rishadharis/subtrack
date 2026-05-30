@@ -1,18 +1,24 @@
 <script lang="ts">
   /**
-   * Root App — Task 8 complete: SubscriptionsList (searchable/filterable management view).
+   * Root App — Task 9 complete: RemindersView + .ics Export (critical "pengingat jatuh tempo" surface).
    *
-   * - Full list with instant search + status/category filters + nextDueDate sort (soonest first)
-   * - Card rows (mobile friendly) showing normalized monthly price, due date + urgency, billing cycle
-   * - Row actions: Edit (re-uses Task 7 modal in edit mode), quick Pause/Resume toggle, Delete (confirm)
-   * - Dashboard "+ Tambah" + subscriptions header "+ Tambah" open the real modal form (Task 7)
-   * - All mutations go through subscriptionStore → auto reactive + persisted
+   * Previous:
+   * - Task 8: SubscriptionsList (searchable/filterable + actions)
+   * - Task 7: Full SubscriptionForm modal
+   *
+   * Task 9 additions:
+   * - Dedicated Reminders screen (active subs due ≤30 days, strong urgency visuals, "Hari ini"/"Dalam X hari")
+   * - Checkbox selection + "Pilih Semua"
+   * - Large prominent "Export ke Kalender (.ics)" button
+   * - Pure client-side icsGenerator.ts (RRULE recurrence per billingCycle, RFC 5545 compliant, real downloads)
+   * - Works with Google Calendar / Outlook / Apple Calendar etc.
    */
 
   import AppShell, { type View } from '$lib/components/AppShell.svelte';
   import Dashboard from '$lib/components/dashboard/Dashboard.svelte';
   import SubscriptionForm from '$lib/components/subscriptions/SubscriptionForm.svelte';
   import SubscriptionsList from '$lib/components/subscriptions/SubscriptionsList.svelte';
+  import RemindersView from '$lib/components/reminders/RemindersView.svelte';
   import type { Subscription } from '$lib/types';
 
   let currentView = $state<View>('dashboard');
@@ -85,14 +91,8 @@
       <SubscriptionsList on:edit={(e) => openSubscriptionForm('edit', e.detail)} />
     </div>
   {:else if currentView === 'reminders'}
-    <div class="space-y-6">
-      <h2 class="text-2xl font-semibold tracking-tight">Reminders</h2>
-      <p class="text-slate-600 dark:text-slate-400">Upcoming renewals and alerts</p>
-
-      <div class="rounded-2xl border border-dashed border-slate-300 p-10 text-center text-sm text-slate-500 dark:border-slate-700 dark:text-slate-400">
-        Reminder list + notification controls will be implemented in later tasks.
-      </div>
-    </div>
+    <!-- Task 9: Full RemindersView with selection + .ics export (replaces placeholder) -->
+    <RemindersView />
   {:else if currentView === 'analytics'}
     <div class="space-y-6">
       <h2 class="text-2xl font-semibold tracking-tight">Analytics</h2>
