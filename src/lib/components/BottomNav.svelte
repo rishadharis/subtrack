@@ -65,13 +65,14 @@
 <nav
   class="fixed bottom-0 left-0 right-0 z-50 flex h-16 items-center justify-around border-t border-slate-200 bg-white/95 px-1 backdrop-blur supports-[backdrop-filter]:bg-white/80 dark:border-slate-800 dark:bg-slate-900/95 md:hidden"
   aria-label="Primary navigation"
+  style="padding-bottom: env(safe-area-inset-bottom, 0px)"
 >
   {#each navItems as item (item.id)}
     {@const isActive = currentView === item.id}
     <button
       type="button"
       onclick={() => onNavigate(item.id)}
-      class="group flex flex-1 flex-col items-center justify-center gap-0.5 rounded-lg py-1 text-[10px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 {isActive
+      class="group flex flex-1 flex-col items-center justify-center gap-0.5 rounded-lg py-1.5 text-[10px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 min-h-[44px] {isActive
         ? 'text-sky-600 dark:text-sky-400'
         : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}"
       aria-current={isActive ? 'page' : undefined}

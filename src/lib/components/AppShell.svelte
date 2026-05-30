@@ -14,6 +14,7 @@
   import BottomNav from './BottomNav.svelte';
   import Sidebar from './Sidebar.svelte';
   import type { Snippet } from 'svelte';
+  import { onMount } from 'svelte';
 
   export type View =
     | 'dashboard'
@@ -33,6 +34,79 @@
 
   // Desktop-only collapse state (persists only for current session)
   let sidebarCollapsed = $state(false);
+
+  /* -------------------------------------------------------------------------------------------------
+   * Task 12: Subtle PWA install prompt (non-aggressive, tasteful, respects user)
+   * Fires the native install flow only on user gesture after the banner appears.
+   * Uses beforeinstallprompt (Chromium/Android/Windows). Hidden in standalone/PWA mode.
+   * Dismissal remembered for the browser session via sessionStorage.
+   * ----------------------------------------------------------------------------------------------- */
+  let deferredPrompt: Event | null = $state(null);
+  let showInstallBanner = $state(false);
+  let isStandalone = $state(false);
+
+  function checkStandalone() {
+    return (
+      window.matchMedia('(display-mode: standalone)').matches ||
+      (navigator as any).standalone === true
+    );
+  }
+
+  function handleBeforeInstallPrompt(e: Event) {
+    // Prevent the mini-infobar from appearing on mobile
+    e.preventDefault();
+    deferredPrompt = e;
+    // Only show if not already standalone and not recently dismissed this session
+    if (!checkStandalone() && !sessionStorage.getItem('installPromptDismissed')) {
+      // Delay for tasteful/non-intrusive experience (user has time to explore first)
+      setTimeout(() => {
+        if (deferredPrompt && !showInstallBanner) {
+          showInstallBanner = true;
+        }
+      }, 42000);
+    }
+  }
+
+  function handleAppInstalled() {
+    showInstallBanner = false;
+    deferredPrompt = null;
+  }
+
+  async function installPWA() {
+    if (!deferredPrompt) return;
+    // @ts-ignore - BeforeInstallPromptEvent has prompt()
+    const promptEvent = deferredPrompt as any;
+    promptEvent.prompt?.();
+    try {
+      const { outcome } = await promptEvent.userChoice;
+      // outcome: 'accepted' | 'dismissed'
+    } catch (_) {
+      // ignore
+    }
+    deferredPrompt = null;
+    showInstallBanner = false;
+  }
+
+  function dismissInstall() {
+    showInstallBanner = false;
+    sessionStorage.setItem('installPromptDismissed', 'true');
+  }
+
+  onMount(() => {
+    isStandalone = checkStandalone();
+    if (isStandalone) {
+      showInstallBanner = false;
+    }
+
+    // Attach PWA install events (cannot use svelte:window for non-bubbling custom events reliably here)
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', handleAppInstalled);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', handleAppInstalled);
+    };
+  });
 
   const viewLabels: Record<View, string> = {
     dashboard: 'Dashboard',
@@ -111,8 +185,32 @@
       <div class="hidden text-xs text-slate-400 md:block">MVP</div>
     </header>
 
+    <!-- Task 12: Subtle, non-aggressive PWA install banner (appears delayed, only when eligible) -->
+    {#if showInstallBanner && !isStandalone}
+      <div class="flex-shrink-0 border-b border-sky-200 bg-sky-50 px-4 py-2 text-sm text-sky-900 dark:border-sky-900/60 dark:bg-sky-950/70 dark:text-sky-200">
+        <div class="mx-auto flex max-w-5xl items-center gap-3">
+          <span class="flex-1">Pasang Subtrack di perangkat untuk akses cepat &amp; pengalaman seperti aplikasi native.</span>
+          <button
+            type="button"
+            onclick={installPWA}
+            class="rounded-lg bg-sky-600 px-3 py-1 text-xs font-semibold text-white transition active:scale-[0.985] hover:bg-sky-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+          >
+            Pasang
+          </button>
+          <button
+            type="button"
+            onclick={dismissInstall}
+            class="rounded px-1.5 text-sky-500 hover:text-sky-700 active:scale-95 dark:text-sky-400"
+            aria-label="Nanti saja"
+          >
+            ✕
+          </button>
+        </div>
+      </div>
+    {/if}
+
     <!-- Content area (receives injected view via Svelte 5 children snippet) -->
-    <main class="flex-1 overflow-y-auto overscroll-contain px-4 py-5 pb-20 md:px-6 md:py-6 md:pb-6">
+    <main class="flex-1 overflow-y-auto overscroll-contain px-4 py-5 pb-[calc(5rem+env(safe-area-inset-bottom,0px))] md:px-6 md:py-6 md:pb-6">
       <div class="mx-auto w-full max-w-5xl">
         {@render children?.()}
       </div>
