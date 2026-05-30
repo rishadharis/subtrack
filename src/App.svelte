@@ -1,17 +1,18 @@
 <script lang="ts">
   /**
-   * Root App — Task 7 complete: SubscriptionForm (fast add/edit) wired end-to-end.
+   * Root App — Task 8 complete: SubscriptionsList (searchable/filterable management view).
    *
-   * - Dashboard "+ Tambah" now opens the real modal form (Task 7)
-   * - Subscriptions view also has working "+ Tambah Langganan" button
-   * - Full support for add + edit modes (edit ready for Task 8 list)
-   * - Smart nextDueDate calc + override + all model fields + validation + tags chips
-   * - Persists via subscriptionStore (addSubscription / updateSubscription)
+   * - Full list with instant search + status/category filters + nextDueDate sort (soonest first)
+   * - Card rows (mobile friendly) showing normalized monthly price, due date + urgency, billing cycle
+   * - Row actions: Edit (re-uses Task 7 modal in edit mode), quick Pause/Resume toggle, Delete (confirm)
+   * - Dashboard "+ Tambah" + subscriptions header "+ Tambah" open the real modal form (Task 7)
+   * - All mutations go through subscriptionStore → auto reactive + persisted
    */
 
   import AppShell, { type View } from '$lib/components/AppShell.svelte';
   import Dashboard from '$lib/components/dashboard/Dashboard.svelte';
   import SubscriptionForm from '$lib/components/subscriptions/SubscriptionForm.svelte';
+  import SubscriptionsList from '$lib/components/subscriptions/SubscriptionsList.svelte';
   import type { Subscription } from '$lib/types';
 
   let currentView = $state<View>('dashboard');
@@ -80,10 +81,8 @@
         </button>
       </div>
 
-      <div class="rounded-2xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500 dark:border-slate-700 dark:text-slate-400">
-        Form tambah/edit cepat sudah aktif (Task 7).<br />
-        Daftar lengkap, pencarian, filter, dan manajemen massal akan hadir di Task 8.
-      </div>
+      <!-- Task 8: Full searchable + filterable list with actions -->
+      <SubscriptionsList on:edit={(e) => openSubscriptionForm('edit', e.detail)} />
     </div>
   {:else if currentView === 'reminders'}
     <div class="space-y-6">
