@@ -1,19 +1,17 @@
 <script lang="ts">
   /**
-   * Root App — Task 10 complete: AnalyticsView (full "analisis pengeluaran bulanan").
+   * Root App — Task 11 complete: SettingsView (file management, backup/restore, categories, preferences).
    *
-   * All features delivered:
-   * - Monthly summary cards + MoM comparison
-   * - 6/12-month spending trend (pure SVG bars)
-   * - Category breakdown (SVG donut + bars)
-   * - Top expensive subscriptions
-   * - 6-month spending forecast with linear trend slope
-   * - Multiple CSV exports (summary, full list, projections)
-   * - Filters (lookback + category)
-   * - Fully reactive + client-side accurate
+   * All features delivered (Task 11):
+   * - Prominent File Management: Download Backup, Restore/Import, Load as main, Forget file, Save, Start fresh
+   * - Clear "your data lives only in your .subtrack file" messaging (no cloud)
+   * - Category management (add/remove custom categories with usage counts + safe confirmations)
+   * - Basic preferences: default currency (live update) + theme (system/light/dark, persisted)
+   * - Full wiring to storage layer (exportBackup, importBackup, loadFromFile, forgetCurrentFile, updateAppSettings, add/removeCategory, etc.)
+   * - Reactive updates + transient feedback
    *
-   * Previous (Task 9):
-   * - Dedicated Reminders screen + real .ics export
+   * Previous (Task 10):
+   * - AnalyticsView with full monthly analysis, trends, forecasts, CSV exports
    */
 
   import AppShell, { type View } from '$lib/components/AppShell.svelte';
@@ -22,6 +20,7 @@
   import SubscriptionsList from '$lib/components/subscriptions/SubscriptionsList.svelte';
   import RemindersView from '$lib/components/reminders/RemindersView.svelte';
   import AnalyticsView from '$lib/components/analytics/AnalyticsView.svelte';
+  import SettingsView from '$lib/components/settings/SettingsView.svelte';
   import type { Subscription } from '$lib/types';
 
   let currentView = $state<View>('dashboard');
@@ -100,24 +99,8 @@
     <!-- Task 10: Full AnalyticsView with monthly cards, trend (SVG), category donut, top subs, forecast, CSV exports -->
     <AnalyticsView />
   {:else if currentView === 'settings'}
-    <div class="space-y-6">
-      <h2 class="text-2xl font-semibold tracking-tight">Settings</h2>
-      <p class="text-slate-600 dark:text-slate-400">Preferences, categories, data management</p>
-
-      <div class="space-y-3">
-        <div class="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
-          <div class="font-medium">Default Currency</div>
-          <div class="mt-1 text-sm text-slate-500 dark:text-slate-400">IDR (placeholder)</div>
-        </div>
-        <div class="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
-          <div class="font-medium">Theme</div>
-          <div class="mt-1 text-sm text-slate-500 dark:text-slate-400">System (placeholder)</div>
-        </div>
-        <div class="rounded-xl border border-dashed border-slate-300 p-4 text-center text-sm text-slate-500 dark:border-slate-700 dark:text-slate-400">
-          File import/export, reset, custom categories, and full settings UI in Task 10+.
-        </div>
-      </div>
-    </div>
+    <!-- Task 11: Full SettingsView — file ownership, backup/restore, categories, preferences -->
+    <SettingsView />
   {/if}
 </AppShell>
 

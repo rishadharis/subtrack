@@ -94,8 +94,8 @@ export interface AppMeta {
 /** Persistent application settings stored inside the data file. */
 export interface AppSettings {
   defaultCurrency: string; // e.g. "IDR"
-  /** Master list of categories (can be customized by user) */
-  categories: Category[];
+  /** Master list of categories (can be customized by user — supports custom strings beyond DEFAULT_CATEGORIES) */
+  categories: string[];
   theme: 'system' | 'light' | 'dark';
 }
 

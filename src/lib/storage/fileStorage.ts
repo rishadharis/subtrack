@@ -13,7 +13,7 @@
  * and react to changes via getAppData() + subscribeToStorageChanges().
  */
 
-import type { AppData } from '../types';
+import type { AppData, AppSettings } from '../types';
 import {
   DATA_VERSION,
   DEFAULT_CATEGORIES,
@@ -783,4 +783,90 @@ export function resetToNewEmptyData(): AppData {
   isDirtyState = false;
   notifyChange();
   return currentData;
+}
+
+/* -------------------------------------------------------------------------------------------------
+ * Settings Management Helpers (Task 11)
+ * ----------------------------------------------------------------------------------------------- */
+
+/**
+ * Partially update app settings and persist the change to the current file (or export if no handle).
+ * Always updates lastModified and marks dirty + notifies listeners.
+ */
+export async function updateAppSettings(updates: Partial<AppSettings>): Promise<void> {
+  const data = getAppData();
+  data.settings = {
+    ...data.settings,
+    ...updates,
+  };
+  data.meta.lastModified = new Date().toISOString();
+  isDirtyState = true;
+  notifyChange();
+
+  try {
+    await saveToFile();
+  } catch (err) {
+    // Non-fatal for UX: change is live in memory; user can export manually
+    console.error('[fileStorage] updateAppSettings persist failed (change kept in memory):', err);
+  }
+}
+
+/**
+ * Add a new category name to the master list (case-insensitive duplicate check).
+ * Returns true if added and persisted.
+ */
+export async function addCategory(category: string): Promise<boolean> {
+  const trimmed = (category || '').trim();
+  if (!trimmed) return false;
+
+  const data = getAppData();
+  const exists = data.settings.categories.some(
+    (c) => c.toLowerCase() === trimmed.toLowerCase()
+  );
+  if (exists) return false;
+
+  data.settings.categories = [...data.settings.categories, trimmed];
+  data.meta.lastModified = new Date().toISOString();
+  isDirtyState = true;
+  notifyChange();
+
+  try {
+    await saveToFile();
+  } catch (err) {
+    console.error('[fileStorage] addCategory persist failed:', err);
+  }
+  return true;
+}
+
+/**
+ * Remove a category from the master list by exact name match.
+ * Does NOT prevent removal if category is still referenced by subscriptions
+ * (the label stays on those records; it simply disappears from pickers).
+ * Returns true if a removal happened.
+ */
+export async function removeCategory(category: string): Promise<boolean> {
+  const data = getAppData();
+  const beforeLen = data.settings.categories.length;
+
+  data.settings.categories = data.settings.categories.filter((c) => c !== category);
+
+  if (data.settings.categories.length === beforeLen) {
+    return false;
+  }
+
+  // Guard against empty master list (keep defaults as safety net)
+  if (data.settings.categories.length === 0) {
+    data.settings.categories = [...DEFAULT_CATEGORIES];
+  }
+
+  data.meta.lastModified = new Date().toISOString();
+  isDirtyState = true;
+  notifyChange();
+
+  try {
+    await saveToFile();
+  } catch (err) {
+    console.error('[fileStorage] removeCategory persist failed:', err);
+  }
+  return true;
 }
