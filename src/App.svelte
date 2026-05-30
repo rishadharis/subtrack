@@ -1,17 +1,19 @@
 <script lang="ts">
   /**
-   * Root App — Task 9 complete: RemindersView + .ics Export (critical "pengingat jatuh tempo" surface).
+   * Root App — Task 10 complete: AnalyticsView (full "analisis pengeluaran bulanan").
    *
-   * Previous:
-   * - Task 8: SubscriptionsList (searchable/filterable + actions)
-   * - Task 7: Full SubscriptionForm modal
+   * All features delivered:
+   * - Monthly summary cards + MoM comparison
+   * - 6/12-month spending trend (pure SVG bars)
+   * - Category breakdown (SVG donut + bars)
+   * - Top expensive subscriptions
+   * - 6-month spending forecast with linear trend slope
+   * - Multiple CSV exports (summary, full list, projections)
+   * - Filters (lookback + category)
+   * - Fully reactive + client-side accurate
    *
-   * Task 9 additions:
-   * - Dedicated Reminders screen (active subs due ≤30 days, strong urgency visuals, "Hari ini"/"Dalam X hari")
-   * - Checkbox selection + "Pilih Semua"
-   * - Large prominent "Export ke Kalender (.ics)" button
-   * - Pure client-side icsGenerator.ts (RRULE recurrence per billingCycle, RFC 5545 compliant, real downloads)
-   * - Works with Google Calendar / Outlook / Apple Calendar etc.
+   * Previous (Task 9):
+   * - Dedicated Reminders screen + real .ics export
    */
 
   import AppShell, { type View } from '$lib/components/AppShell.svelte';
@@ -19,6 +21,7 @@
   import SubscriptionForm from '$lib/components/subscriptions/SubscriptionForm.svelte';
   import SubscriptionsList from '$lib/components/subscriptions/SubscriptionsList.svelte';
   import RemindersView from '$lib/components/reminders/RemindersView.svelte';
+  import AnalyticsView from '$lib/components/analytics/AnalyticsView.svelte';
   import type { Subscription } from '$lib/types';
 
   let currentView = $state<View>('dashboard');
@@ -94,21 +97,8 @@
     <!-- Task 9: Full RemindersView with selection + .ics export (replaces placeholder) -->
     <RemindersView />
   {:else if currentView === 'analytics'}
-    <div class="space-y-6">
-      <h2 class="text-2xl font-semibold tracking-tight">Analytics</h2>
-      <p class="text-slate-600 dark:text-slate-400">Spending insights and trends</p>
-
-      <div class="grid gap-4 sm:grid-cols-2">
-        <div class="aspect-video rounded-2xl border border-dashed border-slate-300 p-6 text-center text-sm text-slate-500 dark:border-slate-700 dark:text-slate-400">
-          Spending by category chart placeholder
-        </div>
-        <div class="aspect-video rounded-2xl border border-dashed border-slate-300 p-6 text-center text-sm text-slate-500 dark:border-slate-700 dark:text-slate-400">
-          Monthly trend chart placeholder
-        </div>
-      </div>
-
-      <div class="text-center text-xs text-slate-500 dark:text-slate-400">Analytics views arrive after core CRUD (Task 8+).</div>
-    </div>
+    <!-- Task 10: Full AnalyticsView with monthly cards, trend (SVG), category donut, top subs, forecast, CSV exports -->
+    <AnalyticsView />
   {:else if currentView === 'settings'}
     <div class="space-y-6">
       <h2 class="text-2xl font-semibold tracking-tight">Settings</h2>
