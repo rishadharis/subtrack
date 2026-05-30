@@ -113,6 +113,33 @@ function notifyChange(): void {
   }
 }
 
+/**
+ * Centralized notifier for storage/file errors (Task 13 hardening).
+ * Logs + dispatches a global CustomEvent so App root can show toast / error boundary UI.
+ * Silently ignores USER_CANCELLED (user-initiated).
+ */
+function notifyStorageError(err: unknown, context = 'storage operation'): void {
+  if (err instanceof StorageError && err.code === STORAGE_ERROR_CODES.USER_CANCELLED) {
+    return; // user action, not an error to surface
+  }
+  console.error(`[fileStorage] ${context}:`, err);
+  if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
+    try {
+      window.dispatchEvent(
+        new CustomEvent('subtrack:storage-error', {
+          detail: {
+            error: err,
+            context,
+            code: (err as any)?.code ?? null,
+          },
+        })
+      );
+    } catch {
+      /* never break storage */
+    }
+  }
+}
+
 /* -------------------------------------------------------------------------------------------------
  * Feature Detection
  * ----------------------------------------------------------------------------------------------- */
@@ -807,7 +834,7 @@ export async function updateAppSettings(updates: Partial<AppSettings>): Promise<
     await saveToFile();
   } catch (err) {
     // Non-fatal for UX: change is live in memory; user can export manually
-    console.error('[fileStorage] updateAppSettings persist failed (change kept in memory):', err);
+    notifyStorageError(err, 'updateAppSettings persist failed (change kept in memory)');
   }
 }
 
@@ -833,7 +860,7 @@ export async function addCategory(category: string): Promise<boolean> {
   try {
     await saveToFile();
   } catch (err) {
-    console.error('[fileStorage] addCategory persist failed:', err);
+    notifyStorageError(err, 'addCategory persist failed');
   }
   return true;
 }
@@ -866,7 +893,7 @@ export async function removeCategory(category: string): Promise<boolean> {
   try {
     await saveToFile();
   } catch (err) {
-    console.error('[fileStorage] removeCategory persist failed:', err);
+    notifyStorageError(err, 'removeCategory persist failed');
   }
   return true;
 }

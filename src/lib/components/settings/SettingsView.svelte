@@ -7,7 +7,7 @@
    * - Prominent, honest File Management section with clear explanations.
    * - Export (backup) + Import + Load-as-main + Forget + Reset flows wired to storage layer.
    * - Category management: add/remove custom (and default) categories, with usage counts and safe guards.
-   * - Basic preferences: defaultCurrency (live) + theme (persisted, basic for now).
+   * - Basic preferences: defaultCurrency (live) + theme (system/light/dark, fully wired + live DOM apply in Task 13).
    * - Uses storage primitives heavily + subscriptionStore for usage counts.
    * - Transient success/error feedback (pattern from RemindersView).
    * - Reactive to external storage changes (import, load, reset from elsewhere) via subscribeToStorageChanges + $effect.
@@ -426,8 +426,7 @@
     clearMessages();
     try {
       await updateAppSettings({ theme: val });
-      showSuccess('Preferensi tema disimpan ke file Anda.', 2200);
-      // Note: actual DOM theme switching not wired in MVP (see banner in UI)
+      showSuccess('Preferensi tema disimpan ke file Anda. (diterapkan langsung)', 2200);
     } catch (err) {
       handleStorageError(err, 'Mengubah tema');
     }

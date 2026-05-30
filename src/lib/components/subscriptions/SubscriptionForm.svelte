@@ -27,6 +27,7 @@
     SUBSCRIPTION_STATUSES,
   } from '$lib/types';
   import { subscriptionStore } from '$lib/stores/subscriptions.svelte';
+  import { getAppData, subscribeToStorageChanges } from '$lib/storage';
 
   interface Props {
     /** 'add' creates new via store.addSubscription; 'edit' pre-fills + uses update */
@@ -103,10 +104,38 @@
   }
 
   /* -----------------------------------------------------------------------------------------------
-   * Category helpers
+   * Category helpers — Task 13: now live from settings (custom categories appear immediately)
    * --------------------------------------------------------------------------------------------- */
 
-  const knownCategories = DEFAULT_CATEGORIES as readonly string[];
+  let catVersion = $state(0);
+  // Subscribe while form is mounted so custom categories added in Settings become selectable
+  $effect(() => {
+    const unsub = subscribeToStorageChanges(() => {
+      catVersion = catVersion + 1;
+    });
+    return unsub;
+  });
+
+  const masterCategories = $derived.by(() => {
+    catVersion; // trigger on external updates (import/reset etc)
+    const fromSettings = getAppData().settings.categories;
+    // Dedupe + preserve order (settings first, then any legacy from DEFAULT not present)
+    const seen = new Set<string>();
+    const list: string[] = [];
+    for (const c of fromSettings) {
+      if (!seen.has(c.toLowerCase())) {
+        seen.add(c.toLowerCase());
+        list.push(c);
+      }
+    }
+    for (const c of DEFAULT_CATEGORIES) {
+      if (!seen.has(c.toLowerCase())) {
+        seen.add(c.toLowerCase());
+        list.push(c);
+      }
+    }
+    return list;
+  });
 
   function handleCategoryChange() {
     if (categoryValue !== '__custom') {
@@ -182,8 +211,10 @@
 
       tags = subscription.tags ? [...subscription.tags] : [];
 
-      // Category (may be custom / not in DEFAULT)
-      if (knownCategories.includes(subscription.category)) {
+      // Category (may be custom / not in DEFAULT) — Task 13 live support
+      const currentCats = getAppData().settings.categories;
+      const isKnown = currentCats.some((c) => c.toLowerCase() === (subscription.category || '').toLowerCase());
+      if (isKnown) {
         categoryValue = subscription.category;
         customCategory = '';
       } else {
@@ -363,15 +394,16 @@
   }
 
   /* -----------------------------------------------------------------------------------------------
-   * Derived labels & UI text
+   * Derived labels & UI text (Task 13: use $derived to avoid Svelte state capture warnings)
    * --------------------------------------------------------------------------------------------- */
 
-  const title = mode === 'add' ? 'Tambah Langganan Baru' : 'Edit Langganan';
-  const submitLabel = mode === 'add' ? 'Tambah Langganan' : 'Simpan Perubahan';
-  const submitIcon =
+  const title = $derived(mode === 'add' ? 'Tambah Langganan Baru' : 'Edit Langganan');
+  const submitLabel = $derived(mode === 'add' ? 'Tambah Langganan' : 'Simpan Perubahan');
+  const submitIcon = $derived(
     mode === 'add'
       ? 'M12 5v14M5 12h14'
-      : 'M5 13l4 4L19 7';
+      : 'M5 13l4 4L19 7'
+  );
 
   // For selects we render friendly Indonesian labels
   const billingLabels: Record<BillingCycle, string> = {
@@ -429,14 +461,15 @@
 
     <!-- Category + Custom -->
     <div>
-      <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Kategori</label>
+      <label for="sub-category" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Kategori</label>
       <div class="grid grid-cols-1 gap-2 sm:grid-cols-[1fr,auto]">
         <select
+          id="sub-category"
           bind:value={categoryValue}
           onchange={handleCategoryChange}
           class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950 dark:text-white"
         >
-          {#each DEFAULT_CATEGORIES as cat}
+          {#each masterCategories as cat (cat)}
             <option value={cat}>{cat}</option>
           {/each}
           <option value="__custom">Lainnya (ketik manual)</option>
@@ -501,10 +534,11 @@
     <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
       <!-- Billing -->
       <div>
-        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+        <label for="sub-billing" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
           Siklus Penagihan
         </label>
         <select
+          id="sub-billing"
           bind:value={form.billingCycle}
           onchange={() => updateNextDueIfNotOverridden()}
           class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950 dark:text-white"
@@ -579,8 +613,9 @@
     <!-- Status + Auto Renew -->
     <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
       <div>
-        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Status</label>
+        <label for="sub-status" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Status</label>
         <select
+          id="sub-status"
           bind:value={form.status}
           class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950 dark:text-white"
         >
@@ -632,7 +667,7 @@
 
       <!-- Tags: chip style, very lightweight -->
       <div>
-        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+        <label for="sub-tags" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
           Tag <span class="font-normal text-slate-400">(opsional, untuk filter nanti)</span>
         </label>
 

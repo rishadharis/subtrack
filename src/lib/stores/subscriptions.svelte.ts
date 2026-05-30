@@ -178,6 +178,10 @@ export async function addSubscription(
     await saveToFile();
   } catch (err) {
     console.error('[subscriptions] Persist failed after addSubscription:', err);
+    // Task 13: surface via global toast (non-fatal, data still in memory)
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('subtrack:storage-error', { detail: { error: err, context: 'add subscription persist' } }));
+    }
   }
 
   return newSub;
@@ -240,6 +244,9 @@ export async function updateSubscription(
     await saveToFile();
   } catch (err) {
     console.error('[subscriptions] Persist failed after updateSubscription:', err);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('subtrack:storage-error', { detail: { error: err, context: 'update subscription persist' } }));
+    }
   }
 }
 
@@ -257,6 +264,9 @@ export async function deleteSubscription(id: string): Promise<boolean> {
     await saveToFile();
   } catch (err) {
     console.error('[subscriptions] Persist failed after deleteSubscription:', err);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('subtrack:storage-error', { detail: { error: err, context: 'delete subscription persist' } }));
+    }
   }
 
   return true;

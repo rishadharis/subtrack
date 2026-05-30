@@ -15,6 +15,7 @@
   import Sidebar from './Sidebar.svelte';
   import type { Snippet } from 'svelte';
   import { onMount } from 'svelte';
+  import { getCurrentFileName, getIsDirty, subscribeToStorageChanges } from '$lib/storage';
 
   export type View =
     | 'dashboard'
@@ -44,6 +45,24 @@
   let deferredPrompt: Event | null = $state(null);
   let showInstallBanner = $state(false);
   let isStandalone = $state(false);
+
+  /* Task 13: Live file status in header (dirty indicator + truncated filename) */
+  let fileVersion = $state(0);
+  const currentFile = $derived.by(() => {
+    fileVersion;
+    return getCurrentFileName();
+  });
+  const isDirty = $derived.by(() => {
+    fileVersion;
+    return getIsDirty();
+  });
+
+  $effect(() => {
+    const unsub = subscribeToStorageChanges(() => {
+      fileVersion += 1;
+    });
+    return unsub;
+  });
 
   function checkStandalone() {
     return (
@@ -181,8 +200,22 @@
         </h1>
       </div>
 
-      <!-- Right side reserved for future (file status, theme, etc). Empty in scaffolding. -->
-      <div class="hidden text-xs text-slate-400 md:block">MVP</div>
+      <!-- Task 13: File status indicator (live dirty + filename) -->
+      <div class="hidden items-center gap-2 text-xs md:flex">
+        {#if currentFile}
+          <span
+            class="inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 font-mono text-[10px] tracking-tight
+              {isDirty
+                ? 'border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-800/70 dark:bg-amber-950/40 dark:text-amber-300'
+                : 'border-slate-200 bg-slate-100 text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400'}"
+            title={currentFile}
+          >
+            {isDirty ? '● ' : ''}{currentFile.length > 18 ? currentFile.slice(0, 15) + '…' : currentFile}
+          </span>
+        {:else}
+          <span class="text-slate-400">MVP • file lokal</span>
+        {/if}
+      </div>
     </header>
 
     <!-- Task 12: Subtle, non-aggressive PWA install banner (appears delayed, only when eligible) -->
