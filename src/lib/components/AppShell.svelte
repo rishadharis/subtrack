@@ -176,7 +176,7 @@
 
 <svelte:window onkeydown={handleKeydown} />
 
-<div class="flex h-screen flex-col overflow-hidden bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 md:flex-row">
+<div class="flex h-dvh flex-col overflow-hidden bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 md:flex-row">
   <!-- Desktop Sidebar (hidden on mobile, width driven by collapse state) -->
   <div
     class="hidden flex-shrink-0 border-r border-slate-200 bg-white transition-[width] duration-150 dark:border-slate-800 dark:bg-slate-900 md:block {sidebarCollapsed
@@ -192,7 +192,7 @@
   </div>
 
   <!-- Main column: header + scrollable content slot -->
-  <div class="flex min-w-0 flex-1 flex-col">
+  <div class="flex min-w-0 min-h-0 flex-1 flex-col">
     <!-- Compact header (always present, adapts per breakpoint) -->
     <header
       class="flex h-12 flex-shrink-0 items-center justify-between border-b border-slate-200 bg-white/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-white/80 dark:border-slate-800 dark:bg-slate-900/95 md:h-14 md:px-6"
@@ -258,7 +258,7 @@
     {/if}
 
     <!-- Content area (receives injected view via Svelte 5 children snippet) -->
-    <main class="flex-1 overflow-y-auto overscroll-contain px-4 py-5 pb-[calc(5rem+env(safe-area-inset-bottom,0px))] md:px-6 md:py-6 md:pb-6">
+    <main class="flex-1 min-h-0 overflow-y-auto overscroll-contain touch-pan-y px-4 py-5 pb-[calc(5rem+env(safe-area-inset-bottom,0px))] md:px-6 md:py-6 md:pb-6">
       <div class="mx-auto w-full max-w-5xl">
         {@render children?.()}
       </div>

@@ -8,10 +8,27 @@ html,
 body {
   margin: 0;
   padding: 0;
+  height: 100%;
 }
 
 body {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Full-height shell for mobile PWAs + prevent unwanted overscroll rubber-banding at body level */
+#app {
+  height: 100dvh; /* dynamic viewport for mobile address bar / PWA safe areas */
+  height: 100vh; /* fallback for older browsers */
+}
+
+html {
+  /* Reduce body-level overscroll effects on mobile */
+  overscroll-behavior: none;
+}
+
+/* Ensure scrollable main areas work reliably on iOS/Android */
+main {
+  -webkit-overflow-scrolling: touch;
 }
