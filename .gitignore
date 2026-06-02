@@ -10,6 +10,7 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+build/
 *.local
 
 # Editor directories and files
@@ -17,14 +18,17 @@ dist-ssr
 !.vscode/extensions.json
 .idea
 .DS_Store
+Thumbs.db
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
   
-# Project-specific (worktree + docs tooling)  
-.worktrees/  
-worktrees/  
+# Project-specific  
 .superpowers/  
-.git-worktree*  
+.git-worktree*
+
+# env
+.env
+.env.*
