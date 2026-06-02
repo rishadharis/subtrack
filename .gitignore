@@ -26,6 +26,8 @@ Thumbs.db
 *.sw?
   
 # Project-specific  
+.worktrees/
+worktrees/
 .superpowers/  
 .git-worktree*
 
