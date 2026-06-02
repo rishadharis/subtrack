@@ -1,0 +1,17 @@
+/* Subtrack MVP - Tailwind CSS v4 + minimal global styles
+ * Principle: secepat mungkin, seringan mungkin (as fast & light as possible)
+ */
+@import "tailwindcss";
+
+/* Essential base styles only - no demo bloat (no .hero, #app, counters, transforms, etc.) */
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
