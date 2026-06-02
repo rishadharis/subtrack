@@ -5,6 +5,8 @@
 Data Anda disimpan di satu file portabel `.subtrack` milik Anda.  
 **Tidak ada cloud. Tidak ada akun. Tidak ada server.**
 
+> **Coba langsung di HP:** [Live Demo](https://subtrack-xxx.pages.dev) (ganti dengan URL Cloudflare kamu). Scroll & install sebagai PWA sudah berfungsi. Data tetap 100% di perangkatmu.
+
 **Prinsip utama:** secepat mungkin, seringan mungkin, dan Anda yang sepenuhnya mengendalikan data.
 
 ---
@@ -47,6 +49,38 @@ Buka browser di alamat yang muncul (biasanya `http://localhost:5173`).
 | `npm run build`     | Build produksi (hasil di folder `dist/`) |
 | `npm run preview`   | Preview hasil build produksi            |
 | `npm run check`     | Type check (Svelte + TypeScript)        |
+
+## Demo Langsung & Deployment
+
+Subtrack di-deploy **otomatis** menggunakan **Cloudflare Pages** via Git integration.
+
+- Hubungkan sekali saja repo GitHub di Cloudflare (Workers & Pages → Create → Pages → Import an existing Git repository).
+- **Setiap `git push` ke `master` akan memicu build + deploy production secara otomatis.**
+- Tidak perlu `wrangler deploy` manual atau upload manual lagi.
+- Preview deployment otomatis dibuat untuk setiap Pull Request.
+- Cek status & log: Cloudflare dashboard → Workers & Pages → pilih project `subtrack` → tab **Deployments**.
+
+**Live URL:**  
+https://subtrack-xxx.pages.dev   ← ganti dengan URL asli dari Cloudflare setelah deploy pertama sukses.
+
+> **Catatan untuk HP:** Scroll di semua menu sudah diperbaiki (menggunakan `h-dvh`, `min-h-0`, `touch-pan-y`, dan dynamic viewport). Fix ini sudah termasuk di commit terakhir yang kamu push.
+
+### Cara Update ke Production
+Cukup:
+```bash
+git add .
+git commit -m "your changes"
+git push
+```
+Tunggu 1-2 menit, Cloudflare akan build otomatis. Refresh halaman live (atau hard refresh) untuk melihat update. Karena pakai `vite-plugin-pwa` dengan `registerType: 'autoUpdate'`, Service Worker biasanya update sendiri.
+
+### Deploy Manual (opsional, untuk testing cepat)
+Jika ingin deploy langsung tanpa Git:
+```bash
+npm run build
+npx wrangler pages deploy dist
+```
+Tapi untuk workflow normal, **Git integration jauh lebih nyaman** (auto + preview).
 
 ## Cara Kerja Penyimpanan Berbasis File (.subtrack)
 
