@@ -142,8 +142,23 @@
   }
 
   // Keyboard support: allow 1-5 digit keys to switch views (dev/QA nicety, hidden from UI)
+  // IMPORTANT: We ignore the event when user is focused in any input/textarea/select
+  // so people can type numbers (e.g. price) without accidentally switching menus.
   function handleKeydown(e: KeyboardEvent) {
     if (e.metaKey || e.ctrlKey || e.altKey) return;
+
+    // Don't hijack keys when user is typing in a form field
+    const active = document.activeElement as HTMLElement | null;
+    if (
+      active &&
+      (active.tagName === 'INPUT' ||
+        active.tagName === 'TEXTAREA' ||
+        active.tagName === 'SELECT' ||
+        active.isContentEditable)
+    ) {
+      return;
+    }
+
     const map: Record<string, View> = {
       '1': 'dashboard',
       '2': 'subscriptions',
